@@ -1,8 +1,20 @@
 # Multiple Linear Regression & Feature Selection Explorer (MLR)
 
-An interactive, publication-quality web dashboard for Multiple Linear Regression and Feature Selection evaluation, designed for **GitHub Pages** deployment.
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-4f46e5?style=for-the-badge&logo=github)](https://jiwawa1006.github.io/DIC2_MultiLR/)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python)](https://python.org)
+[![Methodology](https://img.shields.io/badge/Methodology-CRISP--DM-10b981?style=for-the-badge)](https://en.wikipedia.org/wiki/Cross-industry_standard_process_for_data_mining)
+
+> 🌐 **Live Demo Website**: **[https://jiwawa1006.github.io/DIC2_MultiLR/](https://jiwawa1006.github.io/DIC2_MultiLR/)**
+
+An interactive, publication-quality web dashboard for Multiple Linear Regression and Feature Selection evaluation, deployed on **GitHub Pages**.
 
 Supports interactive model diagnostics, parsimony analysis (Occam's razor), bias-variance tradeoff exploration, and dynamic dataset selection via a dropdown menu.
+
+---
+
+## 📸 Live Dashboard Preview
+
+![Multiple Linear Regression Explorer Dashboard](assets/dashboard_preview.png)
 
 ---
 
@@ -34,6 +46,8 @@ Supports interactive model diagnostics, parsimony analysis (Occam's razor), bias
 
 ```
 MLR/
+├── assets/
+│   └── dashboard_preview.png# Live dashboard screenshot preview
 ├── index.html               # Main dashboard HTML (GitHub Pages entrypoint)
 ├── index.css                # Polished modern stylesheet
 ├── app.js                   # Interactive controller and Chart.js integration
@@ -73,22 +87,19 @@ MLR/
 
 ---
 
-## 🌐 Deploy to GitHub Pages (github.io)
+## 🌐 Live GitHub Pages Deployment
 
-1. Push this repository to GitHub:
-   ```bash
-   git add .
-   git commit -m "Add interactive MLR GitHub Pages dashboard"
-   git push origin main
-   ```
-2. On GitHub, navigate to **Settings** > **Pages**.
-3. Under **Build and deployment**:
-   - **Source**: `Deploy from a branch`
-   - **Branch**: `main` / `root (/)`
-4. Click **Save**. Within 1–2 minutes, your dashboard will be live at:
-   ```
-   https://<your-username>.github.io/<your-repo-name>/
-   ```
+The dashboard is automatically hosted on GitHub Pages:
+
+👉 **[https://jiwawa1006.github.io/DIC2_MultiLR/](https://jiwawa1006.github.io/DIC2_MultiLR/)**
+
+To deploy or update:
+```bash
+git add .
+git commit -m "Update dashboard"
+git push origin main
+```
+GitHub Pages automatically deploys from the `main` branch root `/`.
 
 ---
 
