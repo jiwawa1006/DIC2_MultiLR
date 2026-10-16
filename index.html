@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multiple Linear Regression & Feature Selection Explorer | AIoT Lab</title>
+  <meta name="description" content="Interactive Multiple Linear Regression and Feature Selection Explorer for Machine Learning & AIoT. Compare Filter, Wrapper, and Embedded algorithms with parsimony diagnostics.">
+  
+  <!-- Google Fonts: Outfit & Inter & Fira Code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  
+  <!-- Model Data JS -->
+  <script src="model_data.js"></script>
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+  <!-- Top Sticky Navigation Bar -->
+  <header class="top-header">
+    <div class="header-inner">
+      <div class="brand-group">
+        <div class="breadcrumbs">
+          <a href="#"><i class="fa-solid fa-house"></i> AIoT</a>
+          <i class="fa-solid fa-chevron-right breadcrumb-separator"></i>
+          <span>Machine Learning</span>
+          <i class="fa-solid fa-chevron-right breadcrumb-separator"></i>
+          <span class="breadcrumb-current" id="breadcrumbDataset">50 Startups</span>
+        </div>
+        <div class="header-title-row">
+          <h1>
+            <span class="brand-icon-wrap"><i class="fa-solid fa-chart-line"></i></span>
+            <span id="headerTitle">Multiple Linear Regression Explorer</span>
+          </h1>
+          <span class="badge-pill brand-badge">CRISP-DM</span>
+        </div>
+      </div>
+
+      <!-- Dataset Selector Dropdown (下拉選單) & Header Actions -->
+      <div class="header-controls">
+        <div class="dataset-dropdown-container">
+          <label for="datasetSelect" class="dataset-label">
+            <i class="fa-solid fa-database"></i> Dataset
+          </label>
+          <div class="select-wrapper">
+            <select id="datasetSelect" class="dataset-dropdown" aria-label="Select Dataset">
+              <!-- Dynamically populated from window.DATASETS_DATA -->
+            </select>
+            <i class="fa-solid fa-chevron-down select-caret"></i>
+          </div>
+        </div>
+
+        <a href="https://github.com/jiwawa1006/DIC2_MultiLR" target="_blank" id="githubRepoLink" class="btn btn-secondary" title="View Source on GitHub">
+          <i class="fa-brands fa-github"></i>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Hero Card Banner -->
+    <section class="hero-card" id="heroSection">
+      <div class="hero-content">
+        <h2 id="heroTitle">Feature Selection & Parsimony Analysis</h2>
+        <p id="heroDesc">
+          Evaluate 7 Machine Learning Feature Selection Algorithms (Lasso, Forward SFS, Backward Elimination, RFE, ElasticNet, Mutual Information, Variance Threshold). Explore the bias-variance tradeoff across feature counts $k=1 \dots 5$, pinpointing the optimal parsimonious sweet spot.
+        </p>
+        <div class="hero-tags" id="heroTags">
+          <span class="hero-pill" id="pillDataset"><i class="fa-solid fa-table-list"></i> Dataset: <strong id="heroDatasetName">50 Startups</strong></span>
+          <span class="hero-pill" id="pillSamples"><i class="fa-solid fa-users"></i> Samples: <strong id="heroSamples">50 (40 Train / 10 Test)</strong></span>
+          <span class="hero-pill" id="pillPredictors"><i class="fa-solid fa-cubes"></i> Predictors: <strong id="heroPredictors">5 Encoded Features</strong></span>
+          <span class="hero-pill hero-pill-sweet" id="pillSweet"><i class="fa-solid fa-star"></i> Global Sweet Spot: <strong id="heroSweetSpot">k=2 ($8,206 RMSE)</strong></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Controls Wrapper: Algorithm & k Selection -->
+    <section class="controls-wrapper card" aria-label="Experiment Controls">
+      <div class="control-row">
+        <div class="control-header-line">
+          <span class="control-label"><i class="fa-solid fa-sliders"></i> 1. Select Feature Selection Algorithm</span>
+          <span class="control-hint">Choose an algorithm to inspect its ranked subset, or compare all 7 methods</span>
+        </div>
+        <div class="tabs-pills" id="algoTabs">
+          <!-- Dynamically populated by app.js based on dataset methods -->
+        </div>
+      </div>
+
+      <div class="control-row" style="margin-top: 18px;">
+        <div class="control-header-line">
+          <span class="control-label"><i class="fa-solid fa-list-ol"></i> 2. Number of Selected Features (k = 1 to 5)</span>
+          <span class="control-hint">Toggle $k$ to observe the bias-variance tradeoff and test performance</span>
+        </div>
+        <div class="k-selector-group" id="kSelectorGroup">
+          <!-- Dynamically populated by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Metrics Ribbon (KPI Cards) -->
+    <section class="metrics-grid" id="metricsGrid" aria-label="Key Performance Indicators">
+      <div class="metric-card sweet" id="metricCardRMSE">
+        <div class="metric-title">
+          <span>Test RMSE</span>
+          <span class="badge-tag badge-green" id="rmseBadge"><i class="fa-solid fa-award"></i> Optimal</span>
+        </div>
+        <div class="metric-val" id="valRMSE">--</div>
+        <div class="metric-note">
+          <i class="fa-solid fa-arrow-down" style="color: var(--accent-emerald);"></i>
+          <span>Lower is better (out-of-sample error)</span>
+        </div>
+      </div>
+
+      <div class="metric-card sweet" id="metricCardR2">
+        <div class="metric-title">
+          <span>Test R² Score</span>
+          <span class="badge-tag badge-blue" id="r2Badge"><i class="fa-solid fa-circle-check"></i> Model Fit</span>
+        </div>
+        <div class="metric-val" id="valR2">--</div>
+        <div class="metric-note">
+          <i class="fa-solid fa-chart-simple" style="color: var(--accent-blue);"></i>
+          <span id="r2VarianceNote">Variance explained on test set</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-title">
+          <span>Adjusted R²</span>
+          <i class="fa-solid fa-scale-balanced" style="color: var(--slate-400);"></i>
+        </div>
+        <div class="metric-val" id="valAdjR2">--</div>
+        <div class="metric-note">
+          <span>Penalizes redundant parameters</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-title">
+          <span>Mean Absolute Error</span>
+          <i class="fa-solid fa-calculator" style="color: var(--slate-400);"></i>
+        </div>
+        <div class="metric-val" id="valMAE">--</div>
+        <div class="metric-note">
+          <span>Average test prediction residual</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-title">
+          <span>5-Fold CV RMSE</span>
+          <span class="badge-tag badge-purple"><i class="fa-solid fa-arrows-split-up-and-left"></i> CV</span>
+        </div>
+        <div class="metric-val" id="valCVRMSE">--</div>
+        <div class="metric-note">
+          <span>Cross-validation generalizability</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Active Features Chips & Parsimony Banner -->
+    <section class="active-features-card" aria-label="Active Features">
+      <div class="active-features-left">
+        <span class="active-features-title">
+          <i class="fa-solid fa-check-double" style="color: var(--primary);"></i>
+          Active Predictors (<span id="featuresCount">0</span>):
+        </span>
+        <div id="featuresListChips" class="chips-container">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+      <div id="parsimonyNotice" class="badge-tag badge-green parsimony-badge">
+        <i class="fa-solid fa-star"></i>
+        <span>Occam's Razor: Parsimonious model minimizes out-of-sample test error.</span>
+      </div>
+    </section>
+
+    <!-- Dual Interactive Charts (RMSE and R2) -->
+    <section class="dual-charts-grid" aria-label="Interactive Visualizations">
+      <!-- Left Chart: RMSE -->
+      <div class="card chart-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h3><i class="fa-solid fa-chart-line" style="color: var(--primary);"></i> RMSE vs Feature Count (k)</h3>
+            <div class="card-subtitle">Lower is better. Shows Train vs Test RMSE curve and optimal sweet spot.</div>
+          </div>
+          <span class="badge-tag badge-blue" id="rmseChartBadge">Method</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="rmseChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Right Chart: R-squared -->
+      <div class="card chart-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h3><i class="fa-solid fa-arrow-trend-up" style="color: var(--accent-emerald);"></i> R² vs Feature Count (k)</h3>
+            <div class="card-subtitle">Higher is better. Measures variance explained across feature sizes.</div>
+          </div>
+          <span class="badge-tag badge-green" id="r2ChartBadge">Method</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="r2Chart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fitted Mathematical OLS Regression Equation -->
+    <section class="equation-card card" aria-label="Regression Equation">
+      <div class="equation-title">
+        <i class="fa-solid fa-square-root-variable"></i>
+        <span>Fitted Multiple Linear Regression Equation</span>
+      </div>
+      <div class="equation-formula" id="equationBox">
+        <!-- Dynamically rendered -->
+      </div>
+    </section>
+
+    <!-- Live Calculator & Coefficients Table Grid -->
+    <section class="calc-grid" aria-label="Model Parameters & Interactive Calculator">
+      
+      <!-- Left Column: Coefficients & Statistical Estimates Table -->
+      <div class="card table-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h3><i class="fa-solid fa-table" style="color: var(--primary);"></i> Model Coefficients & Statistical Tests</h3>
+            <div class="card-subtitle">Parameter estimates ($\beta$), standard errors, t-statistics, and 95% confidence intervals.</div>
+          </div>
+          <span class="badge-tag badge-slate" id="fStatBadge">F-test: p &lt; 0.001</span>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table" id="coefTable">
+            <thead>
+              <tr>
+                <th>Predictor</th>
+                <th>Estimate (β)</th>
+                <th>Std. Error</th>
+                <th>t-Stat</th>
+                <th>p-Value</th>
+                <th>95% Conf. Int</th>
+                <th>Significance</th>
+              </tr>
+            </thead>
+            <tbody id="coefTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Right Column: Live Interactive Predictor Calculator -->
+      <div class="card calculator-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h3><i class="fa-solid fa-calculator" style="color: var(--accent-emerald);"></i> Live Value Predictor</h3>
+            <div class="card-subtitle">Simulate predictions in real-time using the active model weights.</div>
+          </div>
+          <span class="badge-tag badge-green"><i class="fa-solid fa-bolt"></i> Real-time</span>
+        </div>
+
+        <div class="calculator-body">
+          <div id="calculatorInputsContainer" class="calc-inputs-container">
+            <!-- Dynamically populated for the active features -->
+          </div>
+
+          <div class="prediction-output-box">
+            <div class="pred-label">Predicted <span id="predTargetLabel">Target</span></div>
+            <div class="pred-value" id="predOutputValue">$0.00</div>
+            <div class="pred-formula-note" id="predFormulaNote">
+              Calculated using active OLS linear parameters
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Residual Diagnostics & Test Outliers Table -->
+    <section class="card outliers-card" aria-label="Residual Diagnostics">
+      <div class="card-header">
+        <div class="card-title-group">
+          <h3><i class="fa-solid fa-magnifying-glass-chart" style="color: var(--accent-amber);"></i> Test Set Residuals & Outlier Diagnostics</h3>
+          <div class="card-subtitle">Out-of-sample test instances sorted by absolute residual error $|y - \hat{y}|$.</div>
+        </div>
+        <span class="badge-tag badge-blue"><i class="fa-solid fa-sort-down"></i> Sorted by |Residual|</span>
+      </div>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Sample ID</th>
+              <th>Actual Value</th>
+              <th>Predicted Value</th>
+              <th>Residual</th>
+              <th>Absolute Error</th>
+              <th>% Error</th>
+              <th>Diagnostic Status</th>
+            </tr>
+          </thead>
+          <tbody id="outliersTableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Static High-Res Figures Gallery (Toggleable) -->
+    <section class="card plot-drawer-card" aria-label="Static Plot Gallery">
+      <div class="card-header cursor-pointer" id="plotDrawerToggle">
+        <div class="card-title-group">
+          <h3>
+            <i class="fa-solid fa-images" style="color: var(--primary);"></i>
+            Original High-Res Matplotlib Figures
+          </h3>
+          <div class="card-subtitle">Click to view the publication-ready 300 DPI exported plots for this method.</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="togglePlotsBtn">
+          <i class="fa-solid fa-chevron-down" id="plotDrawerIcon"></i>
+          <span>Show Figures</span>
+        </button>
+      </div>
+
+      <div class="plot-drawer-body" id="plotDrawerBody" style="display: none;">
+        <div class="plot-grid">
+          <div class="plot-frame">
+            <h4>RMSE Plot</h4>
+            <img id="staticPlotRMSE" src="" alt="RMSE Static Figure" class="static-fig-img">
+            <a id="staticPlotRMSELink" href="#" target="_blank" class="plot-link"><i class="fa-solid fa-expand"></i> Open Full Image</a>
+          </div>
+          <div class="plot-frame">
+            <h4>R² Plot</h4>
+            <img id="staticPlotR2" src="" alt="R² Static Figure" class="static-fig-img">
+            <a id="staticPlotR2Link" href="#" target="_blank" class="plot-link"><i class="fa-solid fa-expand"></i> Open Full Image</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <h4><i class="fa-solid fa-building-columns"></i> AIoT Multiple Linear Regression & Feature Selection Explorer</h4>
+        <p>
+          Designed for regression model diagnostics, Occam's razor parsimony validation, and comparative machine learning feature selection analysis. Fully static and optimized for deployment on <strong>GitHub Pages</strong>.
+        </p>
+      </div>
+      <div class="footer-right">
+        <h5>Methodology & Technical References</h5>
+        <div class="ack-card">
+          <strong>Process:</strong> CRISP-DM (Cross-Industry Standard Process for Data Mining).<br>
+          <strong>Algorithms:</strong> Lasso (L1 regularization), Forward Stepwise Selection, Backward Elimination, Recursive Feature Elimination (RFE), Elastic Net, Mutual Information, Variance Threshold.<br>
+          <strong>Stack:</strong> Pure Vanilla HTML5, Modern CSS3, JavaScript (ES6+), and Chart.js.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

@@ -28,7 +28,7 @@ METHODS = ["variance_threshold", "mutual_information", "forward", "backward", "r
 
 TARGET_COLUMNS = {
     "startups_50": "Profit",
-    "bostun_housing": "MEDV",
+    "boston_housing": "MEDV",
 }
 
 # Utility functions
@@ -268,6 +268,13 @@ def main():
     print("\n======================================================================")
     print("All datasets completed.")
     print("======================================================================")
+
+    try:
+        import export_web_data
+        print("\nExporting web dashboard data to model_data.js...")
+        export_web_data.main()
+    except Exception as e:
+        print(f"Notice: Could not auto-export web data: {e}")
 
 
 if __name__ == "__main__":
